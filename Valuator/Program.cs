@@ -12,7 +12,7 @@ public class Program
         builder.Services.AddRazorPages();
         ConfigurationOptions redisConfiguration = ConfigurationOptions.Parse("localhost:6379");
         ConnectionMultiplexer redisConnection = ConnectionMultiplexer.Connect(redisConfiguration);
-        builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnection); // singleton addScoped почитать
+        builder.Services.AddSingleton<IConnectionMultiplexer>(redisConnection);
 
         var app = builder.Build();
 

@@ -72,7 +72,7 @@ public class IndexModel : PageModel
 
     private double CalculateSimilarity(string text)
     {
-        var allKeys = _redisConnection.GetServer("localhost:6379").Keys();  // упростить
+        var allKeys = _redisConnection.GetServer("localhost:6379").Keys();
         double similarity = 0.0;
         foreach (var key in allKeys)
         {
