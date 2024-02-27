@@ -28,7 +28,6 @@ public class SummaryModel : PageModel
 
         //TODO: проинициализировать свойства Rank и Similarity значениями из БД
         var db = _redisConnection.GetDatabase();
-        /*Rank = double.Parse(db.StringGet($"RANK-{id}"));*/
         Rank = double.Parse(db.StringGet($"RANK-{id}"), System.Globalization.CultureInfo.InvariantCulture);
         Similarity = double.Parse(db.StringGet($"SIMILARITY-{id}"), System.Globalization.CultureInfo.InvariantCulture);
 
