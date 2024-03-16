@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using StackExchange.Redis;
 using static System.Net.Mime.MediaTypeNames;
+using NATS.Client;
+using System.Text;
 
 namespace Valuator.Pages;
 
@@ -35,11 +37,6 @@ public class IndexModel : PageModel
             return Redirect($"index");
         }
 
-        string rankKey = "RANK-" + id;
-        //TODO: посчитать rank и сохранить в БД по ключу rankKey
-        double rank = CalculateRank(text);
-        _db.StringSet(rankKey, rank);
-
         string similarityKey = "SIMILARITY-" + id;
         //TODO: посчитать similarity и сохранить в БД по ключу similarityKey
         double similarity = CalculateSimilarity(text);
@@ -49,25 +46,24 @@ public class IndexModel : PageModel
         //TODO: сохранить в БД text по ключу textKey
         _db.StringSet(textKey, text);
 
-        return Redirect($"summary?id={id}");
-    }
+        //TODO: посчитать rank и сохранить в БД по ключу rankKey
+        CancellationTokenSource cts = new CancellationTokenSource();
 
-    private double CalculateRank(string text)
-    {
-        int totalCharacters = text.Length;
-        int nonAlphabeticCharacters = 0;
+        ConnectionFactory cf = new ConnectionFactory();
 
-        foreach (char character in text)
+        using (IConnection c = cf.CreateConnection())
         {
-            if (!char.IsLetter(character))
-            {
-                nonAlphabeticCharacters++;
-            }
+            byte[] data = Encoding.UTF8.GetBytes(id);
+            c.Publish("valuator.processing.rank", data);
+            
+            c.Drain();
+
+            c.Close();
         }
 
-        double contentRank = (double)nonAlphabeticCharacters / totalCharacters;
+        cts.Cancel();
 
-        return contentRank;
+        return Redirect($"summary?id={id}");
     }
 
     private double CalculateSimilarity(string text)
